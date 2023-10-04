@@ -13,10 +13,10 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.StreamResource;
 import org.springframework.transaction.annotation.Transactional;
-import root.dev.vaadintable.entities.FilesStorage;
+import root.dev.vaadintable.entities.ProductFile;
 import root.dev.vaadintable.entities.Product;
 import root.dev.vaadintable.models.ProductResponse;
-import root.dev.vaadintable.repositories.FilesStorageRepository;
+import root.dev.vaadintable.repositories.ProductFileRepository;
 import root.dev.vaadintable.services.FileUploadReceiver;
 import root.dev.vaadintable.services.ProductService;
 
@@ -37,7 +37,7 @@ public class EditProductDialog extends Dialog {
 
 
     public EditProductDialog(
-            FilesStorageRepository filesStorageRepository,
+            ProductFileRepository productFileRepository,
             UUID productId,
             ProductService productRepository,
             Grid<ProductResponse> grid) {
@@ -53,8 +53,8 @@ public class EditProductDialog extends Dialog {
         numberFieldDiv.add(numberField);
         add(nameFieldDiv, numberFieldDiv, saveButton, cancelButton);
         FileUploadReceiver fileUploadReceiver = new FileUploadReceiver();
-        Upload upload = getUpload(filesStorageRepository, fileUploadReceiver, productId);
-        Div div = getImageGallery(filesStorageRepository, productId);
+        Upload upload = getUpload(productFileRepository, fileUploadReceiver, productId);
+        Div div = getImageGallery(productFileRepository, productId);
         add(nameFieldDiv, numberFieldDiv);
         add(upload);
         add(div);
@@ -97,21 +97,19 @@ public class EditProductDialog extends Dialog {
                 .build();
     }
 
-    private static Div getImageGallery(FilesStorageRepository filesStorageRepository, UUID productId) {
+    private static Div getImageGallery(ProductFileRepository productFileRepository, UUID productId) {
         Div div = new Div();
-        List<FilesStorage> images = filesStorageRepository.findAllByProductId(productId);
-        images.forEach(img -> {
+        List<UUID> uuidsByProductId = productFileRepository.findUuidsByProductId(productId);
+        uuidsByProductId.forEach(uuid -> {
             Image image = new Image();
-            image.setWidth("50px");
-            StreamResource resource = new StreamResource(img.getName(), () -> new ByteArrayInputStream(img.getData()));
-            image.setSrc(resource);
+            image.setSrc("http://localhost:8080/api/product_files/compressed/"+uuid);
             image.setAlt("Image");
             div.add(image);
         });
         return div;
     }
 
-    private static Upload getUpload(FilesStorageRepository filesStorageRepository, FileUploadReceiver fileUploadReceiver, UUID productId) {
+    private static Upload getUpload(ProductFileRepository productFileRepository, FileUploadReceiver fileUploadReceiver, UUID productId) {
         Upload upload = new Upload(fileUploadReceiver);
         upload.setAcceptedFileTypes("image/tiff", ".tiff", ".jpeg", ".jpg", ".png", ".gif");
         upload.addFileRejectedListener(event -> {
@@ -124,14 +122,14 @@ public class EditProductDialog extends Dialog {
 
         upload.addSucceededListener(event -> {
             byte[] fileData = fileUploadReceiver.getFileData();
-            FilesStorage file = new FilesStorage();
+            ProductFile file = new ProductFile();
             file.setData(fileData);
             file.setSize(fileData.length);
             file.setName(event.getFileName());
             file.setMimeType(event.getMIMEType());
             file.setProductId(productId);
 
-            filesStorageRepository.save(file);
+            productFileRepository.save(file);
         });
         return upload;
     }

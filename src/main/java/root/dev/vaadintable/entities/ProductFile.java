@@ -13,7 +13,8 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FilesStorage {
+@Table(name = "product_files")
+public class ProductFile {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;

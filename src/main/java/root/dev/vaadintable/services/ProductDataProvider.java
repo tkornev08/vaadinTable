@@ -3,7 +3,7 @@ package root.dev.vaadintable.services;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import lombok.Getter;
-import root.dev.vaadintable.entities.FilesStorage;
+import root.dev.vaadintable.entities.ProductFile;
 import root.dev.vaadintable.models.ProductFilterRequest;
 import root.dev.vaadintable.models.ProductResponse;
 
@@ -34,16 +34,18 @@ public class ProductDataProvider extends AbstractBackEndDataProvider<ProductResp
                         .id(product.getId())
                         .name(product.getName())
                         .number(product.getNumber())
-                        .files(getFilesByProductId(product.getId()))
+                        .filesId(getFilesByProductId(product.getId()))
                         .build()
         );
         return productResponseStream;
     }
+
     @Override
     protected int sizeInBackEnd(Query<ProductResponse, ProductFilter> query) {
         ProductFilterRequest filter = getProductFilterRequest(query);
         return Math.toIntExact(productService.getCount(filter));
     }
+
     private static ProductFilterRequest getProductFilterRequest(Query<ProductResponse, ProductFilter> query) {
         ProductFilterRequest filter = new ProductFilterRequest();
         filter.setLimit(query.getLimit());
@@ -52,8 +54,8 @@ public class ProductDataProvider extends AbstractBackEndDataProvider<ProductResp
         return filter;
     }
 
-    private List<FilesStorage> getFilesByProductId(UUID id) {
-        return fileService.findByProductId(id);
+    private List<UUID> getFilesByProductId(UUID id) {
+        return fileService.findUuidsByProductId(id);
     }
 
 

@@ -1,7 +1,5 @@
 package root.dev.vaadintable.view;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -12,28 +10,25 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamResource;
 import root.dev.vaadintable.models.ProductResponse;
-import root.dev.vaadintable.repositories.FilesStorageRepository;
+import root.dev.vaadintable.repositories.ProductFileRepository;
 import root.dev.vaadintable.services.FileService;
 import root.dev.vaadintable.services.ProductDataProvider;
 import root.dev.vaadintable.services.ProductFilter;
 import root.dev.vaadintable.services.ProductService;
 
-import java.io.ByteArrayInputStream;
-
 @Route("lazy")
 public class LazyLoadingTable extends Div {
 
-    private final FilesStorageRepository filesStorageRepository;
+    private final ProductFileRepository productFileRepository;
 
     private final ProductFilter personFilter = new ProductFilter();
 
     private final ConfigurableFilterDataProvider<ProductResponse, Void, ProductFilter> filterDataProvider;
     private Grid<ProductResponse> grid = new Grid<>();
 
-    public LazyLoadingTable(ProductService productService, FilesStorageRepository filesStorageRepository, FileService fileService) {
-        this.filesStorageRepository = filesStorageRepository;
+    public LazyLoadingTable(ProductService productService, ProductFileRepository productFileRepository, FileService fileService) {
+        this.productFileRepository = productFileRepository;
         //TODO: remove fileService
         ProductDataProvider dataProvider = new ProductDataProvider(productService, fileService);
         filterDataProvider = dataProvider.withConfigurableFilter();
@@ -48,7 +43,7 @@ public class LazyLoadingTable extends Div {
     private void addGridItemEventListener(ProductService productService) {
         grid.addItemClickListener(event -> {
             ProductResponse selectedProduct = event.getItem();
-            EditProductDialog dialog = new EditProductDialog(this.filesStorageRepository, selectedProduct.getId(), productService, grid);
+            EditProductDialog dialog = new EditProductDialog(this.productFileRepository, selectedProduct.getId(), productService, grid);
             dialog.setItem(selectedProduct);
             dialog.open();
         });
@@ -78,12 +73,10 @@ public class LazyLoadingTable extends Div {
     private void addImageColumn() {
         grid.addComponentColumn(item -> {
             Div div = new Div();
-            if (item.getFiles()!=null && !item.getFiles().isEmpty()) {
-                item.getFiles().forEach(file -> {
+            if (item.getFilesId() != null && !item.getFilesId().isEmpty()) {
+                item.getFilesId().forEach(uuid -> {
                     Image image = new Image();
-                    image.setWidth("50px");
-                    StreamResource resource = new StreamResource(file.getName(), () -> new ByteArrayInputStream(file.getData()));
-                    image.setSrc(resource);
+                    image.setSrc("http://localhost:8080/api/product_files/compressed/"+uuid);
                     image.setAlt("Image");
                     div.add(image);
                 });
