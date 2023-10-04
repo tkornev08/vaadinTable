@@ -1,22 +1,16 @@
 package root.dev.vaadintable.models;
 
-import com.vaadin.flow.data.provider.QuerySortOrder;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProdFilter {
-    int limit;
-    int offset;
-    int page;
-    List<QuerySortOrder> sortOrders;
+public class ProductFilterRequest extends BaseFilter {
     String filter;
     String name;
-    String number;
+    Integer number;
 }

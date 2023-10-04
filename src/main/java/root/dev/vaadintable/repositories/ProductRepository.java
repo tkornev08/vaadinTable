@@ -10,12 +10,10 @@ import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-    @Query("select p from Product p order by p.name limit 10000")
-    List<Product> find100();
+    List<Product> findAllByName(String name);
+
 
     @Query("select p from Product p where p.number = ?1")
-    List<Product> findAllBy(Integer number);
+    List<Product> findAllByNumber(int i);
 
-    @Query("select p from Product p order by p.name ")
-    List<Product> findByLimitAndOffset(int offset, int limit);
 }

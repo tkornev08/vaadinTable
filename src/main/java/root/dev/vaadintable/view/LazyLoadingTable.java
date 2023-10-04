@@ -8,7 +8,6 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -35,6 +34,7 @@ public class LazyLoadingTable extends Div {
 
     public LazyLoadingTable(ProductService productService, FilesStorageRepository filesStorageRepository, FileService fileService) {
         this.filesStorageRepository = filesStorageRepository;
+        //TODO: remove fileService
         ProductDataProvider dataProvider = new ProductDataProvider(productService, fileService);
         filterDataProvider = dataProvider.withConfigurableFilter();
         buildGrid();
@@ -91,15 +91,4 @@ public class LazyLoadingTable extends Div {
             return div;
         }).setHeader("Preview Image");
     }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        super.onDetach(detachEvent);
-    }
-
 }

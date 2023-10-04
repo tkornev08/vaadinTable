@@ -4,8 +4,7 @@ import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import lombok.Getter;
 import root.dev.vaadintable.entities.FilesStorage;
-import root.dev.vaadintable.entities.Product;
-import root.dev.vaadintable.models.ProdFilter;
+import root.dev.vaadintable.models.ProductFilterRequest;
 import root.dev.vaadintable.models.ProductResponse;
 
 import java.util.List;
@@ -29,11 +28,7 @@ public class ProductDataProvider extends AbstractBackEndDataProvider<ProductResp
     protected Stream<ProductResponse> fetchFromBackEnd(Query<ProductResponse, ProductFilter> query) {
         System.out.println("query.getOffset():" + query.getOffset());
         System.out.println("query.getLimit():" + query.getLimit());
-        ProdFilter filter = ProdFilter.builder()
-                .limit(query.getLimit())
-                .offset(query.getOffset())
-                .sortOrders(query.getSortOrders())
-                .build();
+        ProductFilterRequest filter = getProductFilterRequest(query);
         productResponseStream = productService.find(filter).stream().map(product ->
                 ProductResponse.builder()
                         .id(product.getId())
@@ -44,17 +39,22 @@ public class ProductDataProvider extends AbstractBackEndDataProvider<ProductResp
         );
         return productResponseStream;
     }
+    @Override
+    protected int sizeInBackEnd(Query<ProductResponse, ProductFilter> query) {
+        ProductFilterRequest filter = getProductFilterRequest(query);
+        return Math.toIntExact(productService.getCount(filter));
+    }
+    private static ProductFilterRequest getProductFilterRequest(Query<ProductResponse, ProductFilter> query) {
+        ProductFilterRequest filter = new ProductFilterRequest();
+        filter.setLimit(query.getLimit());
+        filter.setOffset(query.getOffset());
+        filter.setSortOrders(query.getSortOrders());
+        return filter;
+    }
 
     private List<FilesStorage> getFilesByProductId(UUID id) {
         return fileService.findByProductId(id);
     }
 
-    @Override
-    protected int sizeInBackEnd(Query<ProductResponse, ProductFilter> query) {
-        ProdFilter filter = ProdFilter.builder()
-                .limit(query.getLimit())
-                .offset(query.getOffset())
-                .build();
-        return productService.count(filter);
-    }
+
 }
