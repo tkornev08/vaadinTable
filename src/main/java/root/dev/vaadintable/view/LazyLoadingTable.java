@@ -21,14 +21,15 @@ public class LazyLoadingTable extends Div {
 
     private final ProductFileRepository productFileRepository;
 
-    private final ProductFilter personFilter = new ProductFilter();
+    private final ProductFilter productFilter = new ProductFilter();
 
     private final ConfigurableFilterDataProvider<Product, Void, ProductFilter> filterDataProvider;
+    private ProductDataProvider dataProvider;
     private Grid<Product> grid = new Grid<>();
 
     public LazyLoadingTable(ProductService productService, ProductFileRepository productFileRepository) {
         this.productFileRepository = productFileRepository;
-        ProductDataProvider dataProvider = new ProductDataProvider(productService);
+        dataProvider = new ProductDataProvider(productService);
         filterDataProvider = dataProvider.withConfigurableFilter();
         buildGrid();
         TextField searchField = buildTextField();
@@ -54,8 +55,8 @@ public class LazyLoadingTable extends Div {
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setValueChangeMode(ValueChangeMode.EAGER);
         searchField.addValueChangeListener(e -> {
-            personFilter.setSearchTerm(e.getValue());
-            filterDataProvider.setFilter(personFilter);
+            productFilter.setSearchText(e.getValue());
+            filterDataProvider.setFilter(productFilter);
         });
         return searchField;
     }

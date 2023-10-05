@@ -1,17 +1,18 @@
 package root.dev.vaadintable.services;
 
+import lombok.Getter;
+import lombok.Setter;
 import root.dev.vaadintable.entities.Product;
 
+@Setter
+@Getter
 public class ProductFilter {
-    private String searchTerm;
+    private String searchText;
 
-    public void setSearchTerm(String searchTerm) {
-        this.searchTerm = searchTerm;
-    }
 
     public boolean test(Product person) {
-        boolean matchesFullName = matches(person.getName(), searchTerm);
-        boolean matchesProfession = matches(person.getNumber().toString(), searchTerm);
+        boolean matchesFullName = matches(person.getName(), searchText);
+        boolean matchesProfession = matches(person.getNumber().toString(), searchText);
         return matchesFullName || matchesProfession;
     }
 

@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import root.dev.vaadintable.entities.Product;
@@ -24,6 +29,7 @@ public class ProductService {
 
     private final ProductRepository productsRepository;
     private final EntityManager entityManager;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
     private final FilterSupportService<Product> productFilterSupportService;
     @Getter
     @Setter
@@ -63,6 +69,13 @@ public class ProductService {
         List<Predicate> predicates = new ArrayList<>();
         if (filter.getName() != null && !filter.getName().isEmpty()) {
             predicates.add(cb.like(cb.lower(root.get("name")), "%" + filter.getName().trim().toLowerCase() + "%"));
+            /**
+             * Попытка реализовать полнотекстовый поиск через ts_vector.
+             * Реализовывается через доп запрос, т.к. Criteria API не поддерживает оператор @@
+             */
+//            String sql = "SELECT id FROM products WHERE to_tsvector(name) @@ plainto_tsquery(:name)";
+//            SqlParameterSource namedParameters = new MapSqlParameterSource("name", filter.getName());
+//            predicates.add(root.get("id").in(this.jdbcTemplate.queryForList(sql, namedParameters, UUID.class)));
         }
         if (filter.getNumber() != null) {
             predicates.add(cb.equal(root.get("number"), filter.getNumber()));

@@ -2,6 +2,7 @@ package root.dev.vaadintable.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.stereotype.Indexed;
 
 import java.util.*;
 
@@ -12,6 +13,7 @@ import java.util.*;
 @Builder
 @Entity
 @Table(name = "products")
+@Indexed
 public class Product {
     @Id
     @GeneratedValue()
