@@ -11,6 +11,6 @@ public interface ProductFileRepository extends JpaRepository<ProductFile, UUID> 
 
     List<ProductFile> findAllByProductId(UUID productId);
 
-    @Query("select p.id from ProductFile p where p.productId = ?1")
+    @Query("select p.id from ProductFile p where p.product.id = ?1")
     List<UUID> findUuidsByProductId(UUID productId);
 }

@@ -11,23 +11,20 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.server.StreamResource;
 import org.springframework.transaction.annotation.Transactional;
-import root.dev.vaadintable.entities.ProductFile;
 import root.dev.vaadintable.entities.Product;
-import root.dev.vaadintable.models.ProductResponse;
+import root.dev.vaadintable.entities.ProductFile;
 import root.dev.vaadintable.repositories.ProductFileRepository;
 import root.dev.vaadintable.services.FileUploadReceiver;
 import root.dev.vaadintable.services.ProductService;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.UUID;
 
 
 public class EditProductDialog extends Dialog {
 
-    private final Grid<ProductResponse> grid;
+    private final Grid<Product> grid;
 
     private final TextField nameField = new TextField("Name");
     private final IntegerField numberField = new IntegerField("Number");
@@ -40,7 +37,7 @@ public class EditProductDialog extends Dialog {
             ProductFileRepository productFileRepository,
             UUID productId,
             ProductService productRepository,
-            Grid<ProductResponse> grid) {
+            Grid<Product> grid) {
         this.grid = grid;
         setCloseOnEsc(true);
         setCloseOnOutsideClick(true);
@@ -89,12 +86,7 @@ public class EditProductDialog extends Dialog {
 
     @Transactional
     public void saveProductChanges(UUID productId, ProductService productRepository) {
-        Product saved = productRepository.save(productId, nameField.getValue(), numberField.getValue());
-        ProductResponse.builder()
-                .id(saved.getId())
-                .number(saved.getNumber())
-                .name(saved.getName())
-                .build();
+        productRepository.save(productId, nameField.getValue(), numberField.getValue());
     }
 
     private static Div getImageGallery(ProductFileRepository productFileRepository, UUID productId) {
@@ -127,14 +119,20 @@ public class EditProductDialog extends Dialog {
             file.setSize(fileData.length);
             file.setName(event.getFileName());
             file.setMimeType(event.getMIMEType());
-            file.setProductId(productId);
+            setProduct(productId, file);
 
             productFileRepository.save(file);
         });
         return upload;
     }
 
-    public void setItem(ProductResponse product) {
+    private static void setProduct(UUID productId, ProductFile file) {
+        Product product = new Product();
+        product.setId(productId);
+        file.setProduct(product);
+    }
+
+    public void setItem(Product product) {
         nameField.setValue(product.getName());
         numberField.setValue(product.getNumber());
     }

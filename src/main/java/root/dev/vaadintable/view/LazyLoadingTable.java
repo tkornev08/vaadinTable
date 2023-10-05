@@ -10,9 +10,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import root.dev.vaadintable.models.ProductResponse;
+import root.dev.vaadintable.entities.Product;
 import root.dev.vaadintable.repositories.ProductFileRepository;
-import root.dev.vaadintable.services.FileService;
 import root.dev.vaadintable.services.ProductDataProvider;
 import root.dev.vaadintable.services.ProductFilter;
 import root.dev.vaadintable.services.ProductService;
@@ -24,13 +23,12 @@ public class LazyLoadingTable extends Div {
 
     private final ProductFilter personFilter = new ProductFilter();
 
-    private final ConfigurableFilterDataProvider<ProductResponse, Void, ProductFilter> filterDataProvider;
-    private Grid<ProductResponse> grid = new Grid<>();
+    private final ConfigurableFilterDataProvider<Product, Void, ProductFilter> filterDataProvider;
+    private Grid<Product> grid = new Grid<>();
 
-    public LazyLoadingTable(ProductService productService, ProductFileRepository productFileRepository, FileService fileService) {
+    public LazyLoadingTable(ProductService productService, ProductFileRepository productFileRepository) {
         this.productFileRepository = productFileRepository;
-        //TODO: remove fileService
-        ProductDataProvider dataProvider = new ProductDataProvider(productService, fileService);
+        ProductDataProvider dataProvider = new ProductDataProvider(productService);
         filterDataProvider = dataProvider.withConfigurableFilter();
         buildGrid();
         TextField searchField = buildTextField();
@@ -42,7 +40,7 @@ public class LazyLoadingTable extends Div {
 
     private void addGridItemEventListener(ProductService productService) {
         grid.addItemClickListener(event -> {
-            ProductResponse selectedProduct = event.getItem();
+            Product selectedProduct = event.getItem();
             EditProductDialog dialog = new EditProductDialog(this.productFileRepository, selectedProduct.getId(), productService, grid);
             dialog.setItem(selectedProduct);
             dialog.open();
@@ -64,8 +62,8 @@ public class LazyLoadingTable extends Div {
 
     private void buildGrid() {
         grid.setMultiSort(true);
-        grid.addColumn(ProductResponse::getName, "name").setHeader("Name");
-        grid.addColumn(ProductResponse::getNumber, "number").setHeader("Number");
+        grid.addColumn(Product::getName, "name").setHeader("Name");
+        grid.addColumn(Product::getNumber, "number").setHeader("Number");
         grid.setItems(filterDataProvider);
         addImageColumn();
     }
@@ -73,8 +71,8 @@ public class LazyLoadingTable extends Div {
     private void addImageColumn() {
         grid.addComponentColumn(item -> {
             Div div = new Div();
-            if (item.getFilesId() != null && !item.getFilesId().isEmpty()) {
-                item.getFilesId().forEach(uuid -> {
+            if (item.getProductFileIds() != null) {
+                item.getProductFileIds().forEach(uuid -> {
                     Image image = new Image();
                     image.setSrc("http://localhost:8080/api/product_files/compressed/"+uuid);
                     image.setAlt("Image");

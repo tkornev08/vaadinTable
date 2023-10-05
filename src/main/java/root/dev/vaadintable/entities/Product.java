@@ -3,14 +3,14 @@ package root.dev.vaadintable.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
+import java.util.*;
 
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Entity
 @Table(name = "products")
 public class Product {
     @Id
@@ -18,4 +18,9 @@ public class Product {
     private UUID id;
     private String name;
     private Integer number;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "product_files", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "id")
+    private List<UUID> productFileIds = new ArrayList<>();
 }

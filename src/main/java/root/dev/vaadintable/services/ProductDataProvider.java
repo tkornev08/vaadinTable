@@ -3,59 +3,43 @@ package root.dev.vaadintable.services;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import lombok.Getter;
-import root.dev.vaadintable.entities.ProductFile;
+import root.dev.vaadintable.entities.Product;
 import root.dev.vaadintable.models.ProductFilterRequest;
-import root.dev.vaadintable.models.ProductResponse;
 
-import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
-public class ProductDataProvider extends AbstractBackEndDataProvider<ProductResponse, ProductFilter> {
+public class ProductDataProvider extends AbstractBackEndDataProvider<Product, ProductFilter> {
 
     private final ProductService productService;
-    private final FileService fileService;
     @Getter
-    private Stream<ProductResponse> productResponseStream;
+    private Stream<Product> productStream;
 
 
-    public ProductDataProvider(ProductService productService, FileService fileService) {
+    public ProductDataProvider(ProductService productService) {
         this.productService = productService;
-        this.fileService = fileService;
     }
 
     @Override
-    protected Stream<ProductResponse> fetchFromBackEnd(Query<ProductResponse, ProductFilter> query) {
+    protected Stream<Product> fetchFromBackEnd(Query<Product, ProductFilter> query) {
         System.out.println("query.getOffset():" + query.getOffset());
         System.out.println("query.getLimit():" + query.getLimit());
         ProductFilterRequest filter = getProductFilterRequest(query);
-        productResponseStream = productService.find(filter).stream().map(product ->
-                ProductResponse.builder()
-                        .id(product.getId())
-                        .name(product.getName())
-                        .number(product.getNumber())
-                        .filesId(getFilesByProductId(product.getId()))
-                        .build()
-        );
-        return productResponseStream;
+        productStream = productService.find(filter).stream();
+        return productStream;
     }
 
     @Override
-    protected int sizeInBackEnd(Query<ProductResponse, ProductFilter> query) {
+    protected int sizeInBackEnd(Query<Product, ProductFilter> query) {
         ProductFilterRequest filter = getProductFilterRequest(query);
         return Math.toIntExact(productService.getCount(filter));
     }
 
-    private static ProductFilterRequest getProductFilterRequest(Query<ProductResponse, ProductFilter> query) {
+    private static ProductFilterRequest getProductFilterRequest(Query<Product, ProductFilter> query) {
         ProductFilterRequest filter = new ProductFilterRequest();
         filter.setLimit(query.getLimit());
         filter.setOffset(query.getOffset());
         filter.setSortOrders(query.getSortOrders());
         return filter;
-    }
-
-    private List<UUID> getFilesByProductId(UUID id) {
-        return fileService.findUuidsByProductId(id);
     }
 
 
