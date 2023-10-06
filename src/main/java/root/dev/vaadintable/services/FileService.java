@@ -23,15 +23,6 @@ public class FileService {
 
     private final ProductFileRepository productFileRepository;
 
-    public List<ProductFile> findByProductId(UUID productId) {
-        return productFileRepository.findAllByProductId(productId);
-    }
-
-    public List<UUID> findUuidsByProductId(UUID productId) {
-        return productFileRepository.findUuidsByProductId(productId);
-    }
-
-
 
     public void getOriginalFileById(UUID id, HttpServletResponse response) {
         ProductFile productFile = productFileRepository.findById(id).orElseThrow(RuntimeException::new);

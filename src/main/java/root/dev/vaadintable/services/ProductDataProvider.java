@@ -21,11 +21,6 @@ public class ProductDataProvider extends AbstractBackEndDataProvider<Product, Pr
 
     @Override
     protected Stream<Product> fetchFromBackEnd(Query<Product, ProductFilter> query) {
-        System.out.println("query.getOffset():" + query.getOffset());
-        System.out.println("query.getLimit():" + query.getLimit());
-        if (query.getFilter().isPresent()) {
-            System.out.println("query.getFilter():" + query.getFilter().get().getSearchText());
-        }
         ProductFilterRequest filter = getProductFilterRequest(query);
         productStream = productService.find(filter).stream();
         return productStream;

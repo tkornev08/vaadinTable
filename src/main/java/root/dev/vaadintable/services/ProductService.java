@@ -39,13 +39,6 @@ public class ProductService {
     private int offset;
 
     @Transactional
-    public void delete(UUID productId) {
-        if (productsRepository.findById(productId).isPresent()) {
-            productsRepository.deleteById(productId);
-        }
-    }
-
-    @Transactional
     public Product save(UUID id, String name, Integer number) {
         Product product = productsRepository.findById(id).orElseThrow(RuntimeException::new);
         product.setNumber(number);
@@ -72,6 +65,7 @@ public class ProductService {
             /**
              * Попытка реализовать полнотекстовый поиск через ts_vector.
              * Реализовывается через доп запрос, т.к. Criteria API не поддерживает оператор @@
+             * По времени выполняется столько же, что и через %, а может и дольше
              */
 //            String sql = "SELECT id FROM products WHERE to_tsvector(name) @@ plainto_tsquery(:name)";
 //            SqlParameterSource namedParameters = new MapSqlParameterSource("name", filter.getName());
