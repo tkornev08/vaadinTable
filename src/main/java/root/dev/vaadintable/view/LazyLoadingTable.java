@@ -138,7 +138,8 @@ public class LazyLoadingTable extends Div {
         searchField.setWidth("50%");
         searchField.setPlaceholder("Search");
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
-        searchField.setValueChangeMode(ValueChangeMode.EAGER);
+        searchField.setValueChangeTimeout(300);
+        searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> {
             productFilter.setSearchText(e.getValue());
             filterDataProvider.setFilter(productFilter);
@@ -216,7 +217,6 @@ public class LazyLoadingTable extends Div {
          */
         getUI().ifPresent(ui -> ui.access((Command) () -> {
             grid.getDataProvider().refreshAll();
-            ui.push();
         }));
     }
 }
